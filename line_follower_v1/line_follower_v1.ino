@@ -20,15 +20,22 @@
 /*************************************************************************
 *  PID control system variables 
 *************************************************************************/
-float  Kp = 0; //related to the proportional control term;  //change the  value by trial-and-error (ex: 0.07).            
-float Ki = 0; //related to the integral  control term; //change the value by trial-and-error (ex: 0.0008).          
-float  Kd = 0; //related to the derivative control term; //change the  value by trial-and-error (ex: 0.6).
+float  Kp = 0.07; //related to the proportional control term;  //change the  value by trial-and-error (ex: 0.07).            
+float Ki = 0.0008; //related to the integral  control term; //change the value by trial-and-error (ex: 0.0008).          
+float  Kd = 0.6; //related to the derivative control term; //change the  value by trial-and-error (ex: 0.6).
               
-int P;
-int I;
-int D;
+int P = 0;
+int I = 0;
+int D = 0;
 
+int  int_error = 0;
+int  der_error = 0;
 int  lastError = 0;
+int  prev_lastError = 0;
+
+int motor_cmd = 0;
+
+int looptime = 250; //??? I made this up
 
 /*************************************************************************
 *  Motor speed variables (choose between 0 - no speed, and 255 - maximum speed)
@@ -93,14 +100,44 @@ void setup(){
 void  PID_control(uint16_t position) {
   int error = 3500 - position; //3500 is the ideal position  (the centre)
 
-  P = error;
-  I = I + error;
-  D = error - lastError;
-  lastError = error;
-  int motorspeed = P*Kp + I*Ki + D*Kd; //calculate the correction //needed to be applied to the speed
+  //Rate-limiting: cap the integrand? Is this even necessary?
+  int temp_error = 0;
+
+  if(error > 7000){
+    temp_error = 7000;
+  } else if(error < 0){
+    temp_error = 0;
+  } else{
+    temp_error = error;
+  }
+
+  //will this prevent a motor from starting again?
+  if(maxspeeda > motor_cmd && 0 < motor_cmd){ //Latching: if at max or min, don't let grow
+     int_error = int_error + temp_error * looptime;
+  }
+  
+  der_error = ((error - prev_lastError) / 2) / looptime; //filter sensor noise
+
+  P = Kp*error; //ORIGINAL CODE: P = error;
+  I = Ki*int_error; //ORIGINAL CODE: I = I + error;
+  D = Kd*der_error; //ORIGINAL CODE: D = error - lastError;
+
+  prev_lastError = lastError; //filter sensor noise
+  lastError = error; //filter sensor noise
+  motor_cmd = P + I + D;
+  
+  //int motorspeed = P*Kp + I*Ki + D*Kd; //calculate the correction //needed to be applied to the speed
                                        
-  int motorspeeda = basespeeda + motorspeed;
-  int motorspeedb = basespeedb -  motorspeed;
+  //int motorspeeda = basespeeda + motorspeed;
+  //int motorspeedb = basespeedb -  motorspeed;
+
+  int motorspeeda = basespeeda + motor_cmd;
+  int motorspeedb = basespeedb + motor_cmd;
+
+  Serial.print("motorspeeda: ");
+  Serial.println(motorspeeda);
+  Serial.print("motorspeedb: ");
+  Serial.println(motorspeedb);
  
   if (motorspeeda > maxspeeda) {
     motorspeeda = maxspeeda;
@@ -114,6 +151,12 @@ void  PID_control(uint16_t position) {
   if (motorspeedb < 0)  {
     motorspeedb = 0;
   } 
+
+  Serial.print("motorspeeda: ");
+  Serial.println(motorspeeda);
+  Serial.print("motorspeedb: ");
+  Serial.println(motorspeedb);
+  
   forward_brake(motorspeeda, motorspeedb);
 }
 
@@ -122,8 +165,8 @@ void loop(){
   // from 0 to 5000 (for a white line, use readLineWhite() instead)
   uint16_t position = qtr.readLineBlack(sensorValues);
 
-
-  Serial.print(position);
+  Serial.print("position: ");
+  Serial.println(position);
 
   int ledPos[2];
   int p=0;
@@ -197,29 +240,29 @@ void loop(){
   // print the sensor values as numbers from 0 to 1000, where 0 means maximum
   // reflectance and 1000 means minimum reflectance, followed by the line
   // position
-  for (uint8_t i = 0; i < SensorCount; i++)
+  /*for (uint8_t i = 0; i < SensorCount; i++)
   {
     Serial.print(sensorValues[i]);
     Serial.print('\t');
   }
-  Serial.println(position);
+  Serial.println(position);*/
 
   PID_control(position);
 
-  delay(250);
+  //delay(250);
 }
 
 //pwnVal ranges 0 - 255
 void  forward_brake(int posa, int posb) {
-  //set the appropriate values for aphase  and bphase so that the robot goes straight
+  //set the appropriate values for aphase and bphase so that the robot goes straight
   //should enable motors to move
-  digitalWrite(LEFTA, HIGH);
-  digitalWrite(LEFTB, LOW);
-  digitalWrite(RIGHTA, HIGH);
-  digitalWrite(RIGHTB, LOW);
+  digitalWrite(LEFTA, LOW);
+  digitalWrite(LEFTB, HIGH);
+  digitalWrite(RIGHTA, LOW);
+  digitalWrite(RIGHTB, HIGH);
 
-  analogWrite(LEFTPWM, posa);
-  analogWrite(RIGHTPWM, posb);
+  analogWrite(LEFTPWM, posb);
+  analogWrite(RIGHTPWM, posa);
 }
 
 // void forward(int pwnVal) {
