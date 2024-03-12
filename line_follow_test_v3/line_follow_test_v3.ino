@@ -42,10 +42,10 @@ int looptime = 250; //??? I made this up
 /*************************************************************************
 *  Motor speed variables (choose between 0 - no speed, and 255 - maximum speed)
 *************************************************************************/
-const  uint8_t maxspeeda = 150;
-const uint8_t maxspeedb = 150;
-const uint8_t basespeeda  = 100;
-const uint8_t basespeedb = 100;
+const  uint8_t maxspeeda = 255;
+const uint8_t maxspeedb = 255;
+const uint8_t basespeeda  = 255;
+const uint8_t basespeedb = 255;
 
 /*************************************************************************
 *  QTR Sensor vars
@@ -68,7 +68,7 @@ void setup(){
 
   // configure the sensors
   qtr.setTypeRC();
-  qtr.setSensorPins((const uint8_t[]){13, 12, 11, 10, 9, 8, 7, 6}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){6, 7, 8, 9, 10, 11, 12, 13}, SensorCount);
   qtr.setEmitterPin(5);
 
   delay(500);
