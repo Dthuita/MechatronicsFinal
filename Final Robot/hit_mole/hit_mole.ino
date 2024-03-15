@@ -1,4 +1,5 @@
 #include <math.h>
+#include <TimerOne.h>
 
 /*************************************************************************
 *  MOTOR and HBRIDGE PINS
@@ -14,9 +15,9 @@
 #define in4 25
 
 // Motor pins
-#define LEFTENCODEA 26
+#define LEFTENCODEA 19
 #define LEFTENCODEB 27
-#define RIGHTENCODEA 28
+#define RIGHTENCODEA 20
 #define RIGHTENCODEB 29
 
 int ori = 1; // robot starts facing forward, 0 means backward and 1 means forward
@@ -24,6 +25,12 @@ int w = 190; // width of wheel base
 int testState = 0;
 char curr = 'w';
 char next = 'b';
+
+int countsPerRotation = 932;
+volatile int counterL = 0;
+volatile int counterR = 0;
+volatile int lastCounterL = 0;
+volatile int lastCounterR = 0;
 
 unsigned long startTime = 0; // for non-blocking delay
 bool isActionInProgress = false; // flag to check if action is in progress
@@ -39,111 +46,162 @@ void setup() {
   pinMode(in4, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(LEFTENCODEA), leftIsr, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RIGHTENCODEA), rightIsr, CHANGE);
+
+  Serial.begin(9600);
+  cmPivotLeft(180);
 }
-
-/*
-void forward(double distance) {
-  long time = distance / 0.0762; // Time = Distance / Speed
-
-  // Set the motor direction to forward
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  analogWrite(enA, 255);
-  analogWrite(enB, 255);
-  delay(3000);
-  analogWrite(enA, 0);
-  analogWrite(enB, 0);
-}
-
-void reverse(double distance) {
-  long time = distance / 0.0762; // Time = Distance / Speed
-
-  // Set the motor direction to reverse
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, HIGH);
-  analogWrite(enA, 255);
-  analogWrite(enB, 255);
-  delay(3000);
-  analogWrite(enA, 0);
-  analogWrite(enB, 0);
-}
-*/
 
 void cmForward(int x) {
-  cm(x,true);
+  cm(x,0);
 }
 
 void cmReverse(int x) {
-  cm(x,false);
+  cm(x,1);
 }
 
-void cm(int x, bool dir) {
-  double distPerCount = 60 * 3.1415926 / countsPerRotation / 2;
+/*
+void cmPivotLeft(int x) {
+  cm(x,2);
+}
+
+void cmPivotRight(int x) {
+  cm(x,3);
+}
+*/
+
+void cmPivotLeft(int angle) {
+  // Convert angle to distance using the wheelbase width
+  double distance = (angle / 360.0) * (M_PI * 95); // 'w' is the wheelbase width in cm
+  cm(distance, 2); // 2 represents pivoting left
+}
+
+void cmPivotRight(int angle) {
+  // Convert angle to distance using the wheelbase width
+  double distance = (angle / 360.0) * (M_PI * 95); // 'w' is the wheelbase width in cm
+  cm(distance, 3); // 3 represents pivoting right
+}
+
+/*
+void cm(int x, int dir) {
+  double distPerCount = (17.6 * 3.1415926) / countsPerRotation;
+  //double distPerCount = 60 * 3.1415926 / countsPerRotation
+  //double distPerCount = 60 * 3.1415926 / countsPerRotation / 2;
   bool complete = false;
   double distL = 0.0;
   double distR = 0.0;
   counterL = 0;
   counterR = 0;
-  //Start moving the motors
-  if(dir) {
-    forward(); }
-  else {
+  // Start moving the motors
+  if(dir == 0)
+    forward();
+  else if (dir == 1)
     reverse();
-  }
+  else if (dir == 2)
+    pivotLeft();
+  else if (dir == 3)
+    pivotRight();
 
-  //Track distance and keep going until we've traveled the correct distance
+  // Track distance and keep going until we've traveled the correct distance
   while(!complete) {
     // Update left distance
     if(counterL != lastCounterL) {
       lastCounterL = counterL;
-      distL = distPerCount * counterL / 10;
+      distL = distPerCount * counterL / 10; // Removed the incorrect division by 10
     }
     // Update right distance
     if(counterR != lastCounterR) {
       lastCounterR = counterR;
-      distR = distPerCount * counterR / 10;
+      distR = distPerCount * counterR / 10; // Removed the incorrect division by 10
     }
     // Check if we've traveled the correct distance
-    if((dir && (distL > x || distR > x)) || (!dir && (distL < -x || distR < -x))) {
+    if((dir && (distL >= x || distR >= x)) || (!dir && (distL <= -x || distR <= -x))) {
       complete = true;
     }
   }
   // Stop the robot
   brake();
 }
+*/
+
+void cm(int x, int dir) {
+  double distPerCount = (17.6 * 3.1415926) / countsPerRotation; // Ensure this is correct based on your wheel's actual circumference
+  bool complete = false;
+  double distL = 0.0;
+  double distR = 0.0;
+  counterL = 0;
+  counterR = 0;
+
+  // Start moving the motors based on direction
+  if(dir == 0) { // Forward
+    forward();
+  } else if (dir == 1) { // Reverse
+    reverse();
+  } else if (dir == 2) { // Pivot Left
+    pivotLeft();
+  } else if (dir == 3) { // Pivot Right
+    pivotRight();
+  }
+
+  // Track distance and keep going until we've traveled the correct distance
+  while(!complete) {
+    // Update left and right distances based on counters
+    if(counterL != lastCounterL) {
+      lastCounterL = counterL;
+      distL += distPerCount; // Simply add because we're tracking total movement
+    }
+    if(counterR != lastCounterR) {
+      lastCounterR = counterR;
+      distR += distPerCount; // Simply add for the same reason
+    }
+
+    // For pivoting, you might choose the larger of the two distances
+    // since one wheel might move slightly more than the other
+    double maxDist = max(distL, distR);
+
+    // Check if we've traveled the correct distance
+    // For pivoting, we compare against the larger of the two distances
+    if (dir == 0 || dir == 1) { // Forward or Reverse
+      if(distL >= x || distR >= x) {
+        complete = true;
+      }
+    } else if (dir == 2 || dir == 3) { // Pivot Left or Right
+      if(maxDist >= x) {
+        complete = true;
+      }
+    }
+  }
+
+  // Stop the robot
+  brake();
+}
+
 
 void forward() {
-  digitalWrite(LEFTA, HIGH);
-  digitalWrite(LEFTB, LOW);
-  digitalWrite(RIGHTA, HIGH);
-  digitalWrite(RIGHTB, LOW);
-  // Set both motors to full speed
-  analogWrite(LEFTPWM, 255);
-  analogWrite(RIGHTPWM, 255);
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  analogWrite(enA, 255);
+  analogWrite(enB, 255);
 }
 
 void reverse() {
-  digitalWrite(LEFTA, LOW);
-  digitalWrite(LEFTB, HIGH);
-  digitalWrite(RIGHTA, LOW);
-  digitalWrite(RIGHTB, HIGH);
-  // Set both motors to full speed
-  analogWrite(LEFTPWM, 255);
-  analogWrite(RIGHTPWM, 255);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+  analogWrite(enA, 255);
+  analogWrite(enB, 255);
 }
 
 void brake() {
   // Turn off all motors
-  digitalWrite(LEFTA, LOW);
-  digitalWrite(LEFTB, LOW);
-  digitalWrite(RIGHTA, LOW);
-  digitalWrite(RIGHTB, LOW);
-  analogWrite(LEFTPWM, 255);
-  analogWrite(RIGHTPWM, 255);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+  analogWrite(enA, 0);
+  analogWrite(enB, 0);
 }
 
 void leftIsr() {
@@ -174,9 +232,9 @@ void rightIsr()
   }
 }
 
-void pivotLeft(float angle) {
-  double distance = (angle / 360.0) * M_PI * w;
-  long time = distance / 0.0762;
+void pivotLeft() {
+  //double distance = (angle / 360.0) * M_PI * w;
+  //long time = distance / 0.0762;
 
   // Set left motor to reverse and right motor to forward for pivot
   digitalWrite(in1, LOW);
@@ -185,14 +243,11 @@ void pivotLeft(float angle) {
   digitalWrite(in4, LOW);
   analogWrite(enA, 255);
   analogWrite(enB, 255);
-  delay(1800);
-  analogWrite(enA, 0);
-  analogWrite(enB, 0);
 }
 
-void pivotRight(float angle) {
-  double distance = (angle / 360.0) * M_PI * w;
-  long time = distance / 0.0762;
+void pivotRight() {
+  //double distance = (angle / 360.0) * M_PI * w;
+  //long time = distance / 0.0762;
 
   // Set left motor to forward and right motor to reverse for pivot
   digitalWrite(in1, HIGH);
@@ -201,45 +256,26 @@ void pivotRight(float angle) {
   digitalWrite(in4, HIGH);
   analogWrite(enA, 255); // Full speed
   analogWrite(enB, 255); // Full speed
-  delay(1800);
-  analogWrite(enA, 0);
-  analogWrite(enB, 0);
 }
 
 void turnMoleForward(float angle, double distance1, double distance2) {
-  forward(distance1);
-  pivotLeft(-1 * angle);
-  forward(distance2);
-  pivotLeft(-1 * angle);
-  forward(distance1);
+  cmForward(distance1);
+  cmPivotLeft(-1 * angle);
+  cmForward(distance2);
+  cmPivotLeft(-1 * angle);
+  cmForward(distance1);
 }
 
 void turnMoleReverse(float angle, double distance1, double distance2) {
-  reverse(distance1);
-  pivotRight(angle);
-  reverse(distance2);
-  pivotRight(angle);
-  reverse(distance1);
+  cmReverse(distance1);
+  cmPivotRight(angle);
+  cmReverse(distance2);
+  cmPivotRight(angle);
+  cmReverse(distance1);
 }
 
-int dist = 0;
 void loop() {
-  if(dist != 0) {
-    Serial.println("Enter a distance to move (enter negative number to move in the reverse direction:");
-  }
-
-  while (Serial.available()==0){}
-  // Tell the robot to travel the specific distance entered by the user
-  dist = Serial.parseInt();
-
-  if(dist > 0) {
-    cmForward(dist);
-  }
-  else {
-    cmReverse(-dist);
-  }
-
-
+  /*
   // Test runs based on the state
   switch (testState) {
     case 0:
@@ -263,6 +299,9 @@ void loop() {
     case 6:
       curr = 'y'; next = 'g';
       break;
+    case 7:
+      brake();
+      break;
     default:
       return;
   }
@@ -274,9 +313,9 @@ void loop() {
     || (curr == 'p' && next == 'y'))
   {
     if (ori == 1)
-      turnMoleForward(-75, 38.1, 197.104);
+      turnMoleForward(-75, 3.81, 19.7104);
     else
-      turnMoleReverse(-75, 38.1, 197.104);
+      turnMoleReverse(-75, 3.81, 19.7104);
     ori = !ori;    
   }
 
@@ -286,9 +325,9 @@ void loop() {
     || (curr == 'y' && next == 'p'))
   {
     if (ori == 1)
-      turnMoleForward(75, 38.1, 197.104);
+      turnMoleForward(75, 3.81, 19.7104);
     else
-      turnMoleReverse(75, 38.1, 197.104);
+      turnMoleReverse(75, 3.81, 19.7104);
     ori = !ori;
   }
 
@@ -297,9 +336,9 @@ void loop() {
     || (curr == 'r' && next == 'y'))
   {
     if (ori == 1)
-      turnMoleForward(-60, 38.1, 381);
+      turnMoleForward(-60, 3.81, 38.1);
     else
-      turnMoleReverse(-60, 38.1, 381);
+      turnMoleReverse(-60, 3.81, 38.1);
     ori = !ori;
   }
 
@@ -308,9 +347,9 @@ void loop() {
     || (curr == 'y' && next == 'r'))
   {
     if (ori == 1)
-      turnMoleForward(60, 38.1, 381);
+      turnMoleForward(60, 3.81, 38.1);
     else
-      turnMoleReverse(60, 38.1, 381);
+      turnMoleReverse(60, 3.81, 38.1);
     ori = !ori;    
   }
 
@@ -319,9 +358,9 @@ void loop() {
     || (curr == 'w' && next == 'y'))
   {
     if (ori == 1)
-      turnMoleForward(-30, 38.1, 659.892);
+      turnMoleForward(-30, 3.81, 65.9892);
     else
-      turnMoleReverse(-30, 38.1, 659.892);
+      turnMoleReverse(-30, 3.81, 65.9892);
     ori = !ori;    
   }  
 
@@ -330,9 +369,9 @@ void loop() {
     || (curr == 'y' && next == 'w'))
   {
     if (ori == 1)
-      turnMoleForward(30, 38.1, 659.892);
+      turnMoleForward(30, 3.81, 65.9892);
     else
-      turnMoleReverse(30, 38.1, 659.892);
+      turnMoleReverse(30, 3.81, 65.9892);
     ori = !ori;    
   }  
 
@@ -340,9 +379,9 @@ void loop() {
     || (curr == 'b' && next == 'y'))
   {
     if (ori == 1)
-      turnMoleForward(-15, 38.1, 736.092);
+      turnMoleForward(-15, 3.81, 73.6092);
     else
-      turnMoleReverse(-15, 38.1, 736.092);
+      turnMoleReverse(-15, 3.81, 73.6092);
     ori = !ori;    
   }  
 
@@ -350,9 +389,9 @@ void loop() {
     || (curr == 'y' && next == 'b'))
   {
     if (ori == 1)
-      turnMoleForward(15, 38.1, 736.092);
+      turnMoleForward(15, 3.81, 73.6092);
     else
-      turnMoleReverse(15, 38.1, 736.092);
+      turnMoleReverse(15, 3.81, 73.6092);
     ori = !ori;    
   }  
 
@@ -360,9 +399,9 @@ void loop() {
     || (curr == 'w' && next == 'p'))
   {
     if (ori == 1)
-      turnMoleForward(-45, 38.1, 538.734);
+      turnMoleForward(-45, 3.81, 53.8734);
     else
-      turnMoleReverse(-45, 38.1, 538.734);
+      turnMoleReverse(-45, 3.81, 53.8734);
     ori = !ori;    
   }  
 
@@ -370,9 +409,9 @@ void loop() {
     || (curr == 'p' && next == 'w'))
   {
     if (ori == 1)
-      turnMoleForward(45, 38.1, 538.734);
+      turnMoleForward(45, 3.81, 53.8734);
     else
-      turnMoleReverse(45, 38.1, 538.734);
+      turnMoleReverse(45, 3.81, 53.8734);
     ori = !ori;    
   }  
 
@@ -380,12 +419,12 @@ void loop() {
     || (curr == 'y' && next == 'g'))
   {
     if (ori == 1)
-      reverse(838.2);
+      cmReverse(8.3);
     else
-      forward(838.2);
+      cmForward(8.3);
     ori = !ori;    
   }  
 
   testState++;
-  delay(3000);
+  delay(20000);*/
 }
