@@ -20,7 +20,7 @@
 #define RIGHTENCODEA 20
 #define RIGHTENCODEB 29
 
-int ori = 1; // robot starts facing forward, 0 means backward and 1 means forward
+int ori = 0; // robot starts facing forward, 1 means backward and 0 means forward
 int w = 190; // width of wheel base
 int testState = 0;
 char curr = 'w';
@@ -48,8 +48,12 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(RIGHTENCODEA), rightIsr, CHANGE);
 
   Serial.begin(9600);
+  
+  //green to blue
+  turnMoleReverse(-75, -90, 3.81, 24);
 
-  turnMoleReverse(-60, 3.81, 38.1);
+  //blue to purple i think
+  turnMoleForward(-50, -30, 3.81, 75);
 }
 
 void cmForward(int x) {
@@ -262,56 +266,48 @@ void pivotRight() {
 }
 
 //Turning the mole to drive forward aka starting backwards
-void turnMoleForward(float angle, double distance1, double distance2) {
+void turnMoleForward(float angle1, float angle2, double distance1, double distance2) {
   cmForward(distance1);
-  delay(500);
 
-  if(angle < 0){
-    cmPivotLeft(-1 * angle);
+  if(angle1 < 0){
+    cmPivotLeft(-1 * angle1);
   }
   else{
-    cmPivotRight(angle);
+    cmPivotRight(angle1);
   }
   
-  delay(500);
   cmForward(distance2);
-  delay(500);
 
-  if(angle < 0){
-    cmPivotLeft(-1 * angle);
+  if(angle2 < 0){
+    cmPivotLeft(-1 * angle2);
   }
   else{
-    cmPivotRight(angle);
+    cmPivotRight(angle2);
   }
   
-  delay(500);
   cmForward(distance1);
 }
 
 //Turning the mole to drive in reverse aka starting forwards
-void turnMoleReverse(float angle, double distance1, double distance2) {
+void turnMoleReverse(float angle1, float angle2, double distance1, double distance2) {
   cmReverse(distance1);
-  delay(500);
   
-  if(angle < 0){
-    cmPivotLeft(-1 * angle);
+  if(angle1 < 0){
+    cmPivotLeft(-1 * angle1);
   }
   else{
-    cmPivotRight(angle);
+    cmPivotRight(angle1);
   }
 
-  delay(500);
   cmReverse(distance2);
-  delay(500);
   
-  if(angle < 0){
-    cmPivotLeft(-1 * angle);
+  if(angle2 < 0){
+    cmPivotLeft(-1 * angle2);
   }
   else{
-    cmPivotRight(angle);
+    cmPivotRight(angle2);
   }
 
-  delay(500);
   cmReverse(distance1);
 }
 
@@ -377,9 +373,9 @@ void loop() {
     || (curr == 'r' && next == 'y'))
   {
     if (ori == 1)
-      turnMoleForward(-60, 3.81, 38.1);
+      turnMoleForward(-52, 3.81, 46);
     else
-      turnMoleReverse(-60, 3.81, 38.1);
+      turnMoleReverse(-52, 3.81, 46);
     ori = !ori;
   }
 
@@ -388,9 +384,9 @@ void loop() {
     || (curr == 'y' && next == 'r'))
   {
     if (ori == 1)
-      turnMoleForward(60, 3.81, 38.1);
+      turnMoleForward(52, 3.81, 46);
     else
-      turnMoleReverse(60, 3.81, 38.1);
+      turnMoleReverse(52, 3.81, 46);
     ori = !ori;    
   }
 
@@ -467,5 +463,5 @@ void loop() {
   }  
 
   testState++;
-  //delay(20000);*/
+  //delay(500);*/
 }
