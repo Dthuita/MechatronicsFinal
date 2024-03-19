@@ -87,11 +87,13 @@
       setupButton();
       
       setupColorSensor();   //find color sensor
+      digitalWrite(colorSensorDetectedLed, HIGH);
       setupHitMole();       //attach servo
       setupMoveMole();      //attach isr's
   
       setupLineDist();      //calibrate line follower (dist sensor done after pin recognition)
-
+      digitalWrite(calibrationDoneLed, HIGH);
+      
       Serial.println("done with setup");
   }
 
@@ -111,16 +113,19 @@
     //after button press, before distance detected
     //lineFollowDistanceSensor
     else if(flag == 1){
+      digitalWrite(lineFollowingStartedLed, HIGH);
       loopLineDist(0);
     }
 
     //after distance detected, before coinSlot marks phase as complete
     else if(flag == 2){
+      digitalWrite(coinSlotStartedLed, HIGH);
       loopCoinSlot();
     }
 
     //after coinSlot marks phase as complete, before pressRedButton marks phase as complete
     else if(flag == 3){
+      digitalWrite(redButtonPressStartedLed, HIGH);
       loopPressButton();
     }
 
@@ -136,6 +141,8 @@
       }
 
       else if(whack == 1){    //should happen 1 time, update where we are then set flag to move on
+        digitalWrite(hitMoleActiveLed, LOW);
+        digitalWrite(moveMoleActiveLed, HIGH);
         moveMoles();
         
         curr = next;
@@ -143,10 +150,14 @@
       }
 
       else if(whack == 2){    //should happen until distance limit detected
+        digitalWrite(moveMoleActiveLed, LOW);
+        digitalWrite(lineDistActiveLed, HIGH);
         loopLineDist(1);
       }
 
       else if(whack == 3){    //should happen 1 time
+        digitalWrite(lineDistActiveLed, LOW);
+        digitalWrite(hitMoleActiveLed, HIGH);
         loopHitMole();
         whack = 0;
       }

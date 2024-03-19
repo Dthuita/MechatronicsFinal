@@ -1,16 +1,24 @@
 //INCLUDE STATEMENTS------------------------------------------------------------------------------------------------------------
     #include <QTRSensors.h>
 
-
 //PIN SETUP------------------------------------------------------------------------------------------------------------
     //DISTANCE SENSOR PINS------------------------------------------------------------------------------------------------------------
-        #define IR_SENSOR_PIN A0 // IR Proximity Sensor
-
+        #define SENSOR A0 // IR Proximity Sensor
 
 //VARIABLE SETUP------------------------------------------------------------------------------------------------------------
     //DISTANCE SENSOR VARIABLES------------------------------------------------------------------------------------------------------------
-        int distance;
+      int distance;
+      int input = 0;
 
+      // Measured voltages
+        double voltages[] = {
+          3.126, 2.29, 1.598, 1.24, 1.014, 0.869, 0.755, 0.678
+        };
+      
+      // Distance points used for measurements
+        double distances[] = {
+          5, 10, 15, 20, 25, 30, 35, 40
+        };
 
     //LINE FOLLOWING VARIABLES------------------------------------------------------------------------------------------------------------
         //PID VARIABLES------------------------------------------------------------------------------------------------------------
@@ -84,12 +92,29 @@
 
 //DISTANCE FUNCTIONS------------------------------------------------------------------------------------------------------------
     void measureDistance() {
-      int sensorValue = analogRead(IR_SENSOR_PIN); // Read the analog value from the sensor
-      float voltage = sensorValue * (5.0 / 1023.0); // Convert to voltage
-      distance = (27.728 * pow(voltage, -1.2045)); // Convert voltage to distance
-    
-      Serial.print("Distance: ");
-      Serial.println(distance);
+      input = analogRead(SENSOR);
+      
+      // Compute voltage from the sensor value
+      double voltage = input * 5.0 / 1023.0;
+      int i = 0;
+      
+      // Determine which two voltages the measurement falls between
+      while(voltages[i] > voltage){
+        i++;
+      }
+        
+      // Avoid out of bounds error
+      if(i != 0 && i<8) {
+        // Compute the slope = change in distance over change in voltage
+        double slope = (distances[i] - distances[i-1]) / (voltages[i] - voltages[i-1]);
+        // Use slope to compute distance
+        double distance = distances[i-1] + slope * (voltage - voltages[i-1]);
+        // Print to the serial output
+        Serial.print("---------------------");
+        Serial.print("COMPUTED DISTANCE: ");
+        Serial.print(distance);
+        Serial.println("cm");
+      }
     }
 
 
@@ -140,10 +165,10 @@
     }
     
     void forward_brake(int a, int b){
-      digitalWrite(in1, LOW);
-      digitalWrite(in2, HIGH);
-      digitalWrite(in3, LOW);
-      digitalWrite(in4, HIGH);
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, HIGH);
+      digitalWrite(in4, LOW);
     
       analogWrite(enA, a);
       analogWrite(enB, b);
