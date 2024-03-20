@@ -18,6 +18,7 @@ void setup() {
   init_LineSensor();
   init_Servo();
   init_wheelMotors();
+  setupMoveMole();
 
   //init btn
   pinMode(BtnPin, INPUT_PULLUP);
@@ -75,7 +76,7 @@ void loop() {
       
       swing_hammer();
     }
-  }*/
+  }
 
   /*
   //on btn push test
