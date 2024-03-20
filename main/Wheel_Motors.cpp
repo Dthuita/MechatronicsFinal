@@ -93,7 +93,8 @@ void turnLeft() {
   analogWrite(enA, 0);
   analogWrite(enB, 255);
 }
-void pivotLeft() {
+
+/*void pivotLeft() {
   //Left motor goes backwards, right motor goes forwards
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
@@ -112,7 +113,7 @@ void reverse() {
   // Set both motors to full speed
   analogWrite(enA, 255);
   analogWrite(enB, 255);
-}
+}*/
 
 
 void  PID_control(uint16_t position) {
