@@ -16,9 +16,9 @@
 #define in4 25
 
 //motor pins
-#define LEFTENCODEA 26
+#define LEFTENCODEA 18
 #define LEFTENCODEB 27
-#define RIGHTENCODEA 28
+#define RIGHTENCODEA 19
 #define RIGHTENCODEB 29
 
 /************** VARs **************/

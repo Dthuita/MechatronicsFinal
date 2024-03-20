@@ -49,5 +49,7 @@ void follow_line();
 //test
 void test_lineSensor();
 
+/***************** MEGAN'S CODE *****************/
+void cmForward(int x);
 
 #endif

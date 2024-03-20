@@ -28,8 +28,8 @@ void setup() {
 }
 
 void loop() {
-  
-  int START = millis();
+  cmForward(3);
+  /*int START = millis();
 
   //On btn push START
   if( 1 == 1){ 
@@ -75,7 +75,7 @@ void loop() {
       
       swing_hammer();
     }
-  }
+  }*/
 
   /*
   //on btn push test
