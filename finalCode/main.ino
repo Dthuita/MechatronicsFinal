@@ -68,17 +68,22 @@ void loop() {
 }
 
 void Coin_Knocker(){
-  //pivot turn and knock first pair of coins
-
+//pivot turn and knock first pair of coins
   pivotLeft();
-  delay(2000);
+  delay(1000);
   reverse();
   delay(2000);
   
   //slight turn while foward driving then back up at angle and knock next pair of coins
+  Serial.println("Move  foward left angled");
+  forward_brake(100, 250);
+  delay(2100);
 
-  forward_brake(200, 255); //move foward with slight lean to left
-  delay(2000);
-  reverse_brake(255, 180); //move foward with slight lean to left
-  delay(2000);
+  Serial.println("pivot to angle");
+  forward_brake(250, 0);
+  delay(900);
+
+  Serial.println("Move backward right angled");
+  reverse_brake(250, 250);
+  delay(2500);
 }
