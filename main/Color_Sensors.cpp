@@ -45,13 +45,13 @@ const int COLOR_SAMPLE[][6] = { //ColorTemp, Lux, RGB values, clear value
   // {8815, 65145, 997, 831, 1885, 3590},      //yellow_4 -- 
 
 };
-const char* COLOR_NAME[] = {
-  "Red", "Red", "Red",
-  "Green", "Green", "Green",
-  "Blue", "Blue", "Blue",
-  "White", "White", "White",
-  "Purple", "Purple", "Purple",
-  "Yellow" "Yellow", "Yellow",
+const char COLOR_NAME[] = {
+  'r', 'r', 'r',
+  'g', 'g', 'g',
+  'b', 'b', 'b',
+  'w', 'w', 'w',
+  'p', 'p', 'p',
+  'y', 'y', 'y'
 };
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_16X);

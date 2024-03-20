@@ -4,8 +4,12 @@
 /************** PINS **************/
 #define BtnPin 30
 
-/************** PINS **************/
+/************** VARIABLES **************/
 const unsigned long PART_ONE = 30000; //how long part one, getting to wall will take
+const unsigned long PART_TWO = 10000; //how long recentering on the line will take as fail safe
+
+char curr = 'w';
+char next = 'w';
 
 void setup() {
   
@@ -41,17 +45,36 @@ void loop() {
       Serial.println("line following!");
     }
 
-    ////////////wall detected so turn to knock coins////////////
+    //////////// wall detected so turn to knock coins ////////////
     Serial.println("Coin knock!");
     Coin_Knocker();
-    //go foward in 45deg angle till btn hit then back up x cm
 
-    //sense color?
 
-    //go to color
+    // MEGAN ADDED CODE STARTS HERE//
+    
+    /////////// hit button ///////////
+    loopPressButton();
 
-    //wack mole
+    /////////// begin mole whacking ////////////
+    while(1){
+      next = get_color();
+      moveMoles();
 
+      START = millis();
+  
+      int x, y;
+      while( (x = calcDist()) > 5.0 && (y= millis()-START) < PART_TWO){
+  
+        Serial.print("dis: ");Serial.println(x);
+        Serial.print("time: ");Serial.println(y);
+  
+        //linefolow
+        follow_line();
+        Serial.println("line following!");
+      }
+      
+      swing_hammer();
+    }
   }
 
   /*
