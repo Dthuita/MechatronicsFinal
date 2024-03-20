@@ -2,25 +2,23 @@
 #include <math.h>
 #include <TimerOne.h>
 
-//MOTOR AND HBRIDGE PINS------------------------------------------------------------------------------------------------------------
-  //LEFT MOTOR
+//VARIABLE SETUP------------------------------------------------------------------------------------------------------------
+
+    // Left Motor
     #define enA 3
     #define in1 22
     #define in2 24
     
-  //RIGHT MOTOR 
+    // Right Motor
     #define enB 2
     #define in3 23
     #define in4 25
     
-  //MOTOR ENCODES
+    // Motor pins
     #define LEFTENCODEA 18
     #define LEFTENCODEB 27
     #define RIGHTENCODEA 19
     #define RIGHTENCODEB 29
-    
-
-//VARIABLE SETUP------------------------------------------------------------------------------------------------------------
     
     //Distance variables
     int countsPerRotation = 932;
@@ -30,14 +28,19 @@
     volatile int lastCounterR = 0;
 
 
-//SETUP FUNCTION(ITIZED VERSION)------------------------------------------------------------------------------------------------------------
+void init_moveMole(){
+  // Configure H-bridge pins 
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(LEFTENCODEA), leftIsr, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHTENCODEA), rightIsr, CHANGE);
 
-    void setupMoveMole() {
-      attachInterrupt(digitalPinToInterrupt(LEFTENCODEA), leftIsr, CHANGE);
-      attachInterrupt(digitalPinToInterrupt(RIGHTENCODEA), rightIsr, CHANGE);
-
-      Serial.println("setupMoveMole() done");
-    }
+  Serial.begin(9600);
+}
 
 
 //CONVERT INPUTS INTO DISTANCE------------------------------------------------------------------------------------------------------------
@@ -247,12 +250,6 @@
     //turnMoleReverse(200, 6, 70);
     
     void moveMoles(){
-      Serial.print("curr: ");
-      Serial.println(curr);
-
-      Serial.print("next: ");
-      Serial.println(next);
-      
       if ((curr == 'g' && next == 'b')
         || (curr == 'b' && next == 'w')
         || (curr == 'r' && next == 'p')
@@ -263,6 +260,7 @@
     
       else if ((curr == 'b' && next == 'g')
         || (curr == 'w' && next == 'b')
+        || (curr =='u' && next == 'w')
         || (curr == 'p' && next == 'r')
         || (curr == 'y' && next == 'p'))
       {
@@ -326,7 +324,3 @@
         turnMoleLeftToRight(200, 6, 70);
       }
     }
-
-
-//LOOP------------------------------------------------------------------------------------------------------------
-//empty

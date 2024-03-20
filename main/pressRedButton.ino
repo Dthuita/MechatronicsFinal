@@ -5,13 +5,9 @@ void setupButton(){
 }
 
 void loopPressButton(){
-  cmForward(30);
-  
-  //turn 90 degrees
-  cmPivotRight(90);
-  
-  //line follow until 1.5 inch = roughly 5 cm
-  cmForward(5);
+  cmForward(150);
+  brake();
+  delay(1000);
   
   //move from button to white
   turnMoleRightToLeft(105, 6, 20);  

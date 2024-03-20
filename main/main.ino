@@ -8,7 +8,7 @@
 const unsigned long PART_ONE = 30000; //how long part one, getting to wall will take
 const unsigned long PART_TWO = 10000; //how long recentering on the line will take as fail safe
 
-char curr = 'w';
+char curr = 'u';
 char next = 'w';
 
 void setup() {
@@ -18,19 +18,19 @@ void setup() {
   init_LineSensor();
   init_Servo();
   init_wheelMotors();
-  setupMoveMole();
+  
+  init_moveMole();
 
   //init btn
   pinMode(BtnPin, INPUT_PULLUP);
 
   //calibrate line sensor
   calibrate_lineSensor();
-  // Serial.print("Setup co");
+   Serial.print("Setup co");
 }
 
 void loop() {
-  cmForward(3);
-  /*int START = millis();
+  int START = millis();
 
   //On btn push START
   if( 1 == 1){ 
@@ -48,18 +48,23 @@ void loop() {
 
     //////////// wall detected so turn to knock coins ////////////
     Serial.println("Coin knock!");
-    Coin_Knocker();
-
+    //Coin_Knocker();
+    coin2();
 
     // MEGAN ADDED CODE STARTS HERE//
     
     /////////// hit button ///////////
-    loopPressButton();
+    //loopPressButton();
 
     /////////// begin mole whacking ////////////
     while(1){
       next = get_color();
+      next = get_color();
+      next = get_color();
+      
       moveMoles();
+
+      curr = next;
 
       START = millis();
   
@@ -84,6 +89,9 @@ void loop() {
     //motor_test();
     //line_follower_test();
     //color_sensor_test();
+    '';
+
+    
     //servo_motor_test();
     //dist_test();
   }
@@ -110,4 +118,24 @@ void Coin_Knocker(){
   Serial.println("Move backward right angled");
   reverse_brake(250, 250);
   delay(2500);
+}
+
+void coin2(){
+  cmForward(3);
+  cmPivotLeft(100);
+  cmReverse(5);
+
+  cmForward(5);
+  cmPivotLeft(100);
+  cmForward(15);
+
+  cmPivotRight(100);
+  cmReverse(5);
+  
+  cmForward(5);
+  cmPivotRight(100);
+  cmForward(7);
+  
+  cmPivotLeft(100);
+  cmForward(100);
 }
