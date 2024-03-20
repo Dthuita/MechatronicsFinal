@@ -30,10 +30,10 @@ void setup() {
 }
 
 void loop() {
-  int START = millis();
-
   //On btn push START
-  if( 1 == 1){ 
+  if( BtnPin == 1){ 
+    int START = millis();
+    
     //////////// run line following for some time or until wall detected ////////////
     int x, y;
     while( (x = calcDist()) > 5.0 && (y= millis()-START) < PART_ONE){
