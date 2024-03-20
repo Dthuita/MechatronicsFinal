@@ -1,7 +1,15 @@
-#include <Wire.h>
-#include "Adafruit_TCS34725.h"
+
+#include "RobotFunctions.h"
 
 //ACCURATE ONLY FROM 0 - 95mm(3.75 in) max
+
+/************** PINS **************/
+/*
+  NEED: RGB sensor pins -> arduino pins
+  Vin -> 5v; GND -> GND; (4)SCL -> (21)SCL; (5)SDA -> (20)SDA
+*/
+
+/************** VARs **************/
 
 const int COLOR_SAMPLE[][6] = { //ColorTemp, Lux, RGB values, clear value
   {1828, 64828, 2832, 330, 424, 3362},       //red_1 -- close
@@ -48,6 +56,20 @@ const char* COLOR_NAME[] = {
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_16X);
 
+/************** FUNCs **************/
+
+void init_ColorSensor(void) {
+  Serial.begin(9600);
+
+  if (tcs.begin()) {
+    Serial.println("Found sensor");
+  } else {
+    Serial.println("No TCS34725 found ... check your connections");
+    while (1);
+  }
+}
+
+
 int getColorDis(int red, int green, int blue, int lux, int cTemp, int SAMPLE[5]){
   //ColorTemp, Lux, RGB values, clear value
   // Serial.print("sample testing var: ");Serial.println(SAMPLE[0]);
@@ -74,19 +96,7 @@ char* discrim(int R, int G, int B, int LUX, int CTEMP){
   return possible_color;
 }
 
-void setup(void) {
-  Serial.begin(9600);
-
-  if (tcs.begin()) {
-    Serial.println("Found sensor");
-  } else {
-    Serial.println("No TCS34725 found ... check your connections");
-    while (1);
-  }
-}
-
-
-void loop(void) {
+char* get_color(void) {
   uint16_t r, g, b, c, colorTemp, lux;
 
 
@@ -98,11 +108,9 @@ void loop(void) {
 
   char* color = discrim(r, g, b, lux, colorTemp);
   Serial.print("Color: ");Serial.println(color);
+  return color;
+}
 
-  // Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
-  // Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
-  // Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-  // Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-  // Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
-  // Serial.print("C: "); Serial.print(c, DEC); Serial.println(" ");
+void color_test(){
+  //nothing
 }
