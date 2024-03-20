@@ -107,6 +107,7 @@
       if(digitalRead(startButtonPin) == HIGH){ 
         flag = 1; //once start button is pressed, ready to move onto next phase aka start
         Serial.println("button pressed");
+        delay(500);
       }
     } 
 
@@ -138,6 +139,7 @@
         colorReading();
         
         whack = 1;
+        delay(500);
       }
 
       else if(whack == 1){    //should happen 1 time, update where we are then set flag to move on
@@ -147,6 +149,7 @@
         
         curr = next;
         whack = 2;
+        delay(500);
       }
 
       else if(whack == 2){    //should happen until distance limit detected
@@ -160,6 +163,7 @@
         digitalWrite(hitMoleActiveLed, HIGH);
         loopHitMole();
         whack = 0;
+        delay(500);
       }
     }
   

@@ -177,38 +177,53 @@
 //LOOP FUNCTIONITIZED------------------------------------------------------------------------------------------------------------
     void loopLineDist(int vers) {
       measureDistance(); // Measure distance to the nearest obstacle
-    
-      if (distance > 8) { // Proceed if the distance is greater than 8 cm
-        uint16_t position = qtr.readLineBlack(sensorValues);
-        Serial.print("Position: ");
-        Serial.println(position);
 
-    //unneccessary now
-//        // Original LED logic
-//        int ledPos[2];
-//        int p = 0;
-//        // Update the LED indicators based on the line position
-//        for(int i = 0; i < SensorCount; i++){
-//          if(position > (i * 1000) && position < ((i+1) * 1000)){
-//            digitalWrite(LED_PINS[i], LOW);
-//            ledPos[p] = i;
-//            p++;
-//          } else {
-//            digitalWrite(LED_PINS[i], HIGH);
-//          }
-//        }
-    
-        PID_control(position); // Execute PID control based on line position
-    
-      } else {
-        forward_brake(0, 0); // Stop the motors if too close to an obstacle
-        Serial.println("Too close to an obstacle, stopping. AKA done with loopLineDist.");
-        
-        if(vers == 0){
-          flag = 2;
+      if(vers == 2){
+        if (distance > 8) { // Proceed if the distance is greater than 8 cm
+          uint16_t position = qtr.readLineBlack(sensorValues);
+          Serial.print("Position: ");
+          Serial.println(position);
+      
+          PID_control(position); // Execute PID control based on line position
+      
+        } else {
+          forward_brake(0, 0); // Stop the motors if too close to an obstacle
+          Serial.println("Too close to an obstacle, stopping. AKA done with loopLineDist vers 2.");
+        }    
+      }
+      if(vers == 3){
+        if (distance > 30) { // Proceed if the distance is greater than 8 cm
+          uint16_t position = qtr.readLineBlack(sensorValues);
+          Serial.print("Position: ");
+          Serial.println(position);
+      
+          PID_control(position); // Execute PID control based on line position
+      
+        } else {
+          forward_brake(0, 0); // Stop the motors if too close to an obstacle
+          Serial.println("Too close to an obstacle, stopping. AKA done with loopLineDist vers 3.");
         }
-        else if(vers == 1){
-          whack = 3;
+      }
+      else{
+        if (distance > 8) { // Proceed if the distance is greater than 8 cm
+          uint16_t position = qtr.readLineBlack(sensorValues);
+          Serial.print("Position: ");
+          Serial.println(position);
+      
+          PID_control(position); // Execute PID control based on line position
+      
+        } else {
+          forward_brake(0, 0); // Stop the motors if too close to an obstacle
+          Serial.println("Too close to an obstacle, stopping. AKA done with loopLineDist.");
+          
+          if(vers == 0){
+            flag = 2;
+            delay(500);
+          }
+          else if(vers == 1){
+            whack = 3;
+            delay(500);
+          }
         }
       }
     }
