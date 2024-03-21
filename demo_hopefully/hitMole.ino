@@ -1,19 +1,26 @@
-#include <Servo.h>
+//INCLUDE LIBRARIES------------------------------------------------------------------------------------------------------------
+  #include <Servo.h>
 
-#define powerPin 11
 
-Servo myservo;  // create servo object to control a servo
-int pos = 0; 
+//VARIABLE DECLARATION------------------------------------------------------------------------------------------------------------
+  #define powerPin 32
 
-void setup() {
-  myservo.attach(6);  // (pin, min, max)
+  Servo myservo;  // create servo object to control a servo
+  int pos = 0; 
+
+  
+//FUNCTIONITIZED SETUP------------------------------------------------------------------------------------------------------------
+void setupHitMole() {
+  myservo.attach(33);  // (pin, min, max)
 
   pinMode(powerPin, OUTPUT);  
   digitalWrite(powerPin, HIGH);
-  Serial.begin(9600);
+
+  Serial.println("setupHitMole() done");
 }
 
-void loop() {
+//LOOP------------------------------------------------------------------------------------------------------------
+void loopHitMole() {
   // digitalWrite(powerPin, HIGH);
 
   for(pos = 0; pos < 180; pos += 1)  // goes from 0 degrees to 180 degrees 
