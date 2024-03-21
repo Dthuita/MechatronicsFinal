@@ -9,7 +9,7 @@ const unsigned long PART_ONE = 30000; //how long part one, getting to wall will 
 const unsigned long PART_TWO = 10000; //how long recentering on the line will take as fail safe
 
 char curr = 'u';
-char next = 'w';
+char next = 'r';
 
 void setup() {
   
@@ -22,7 +22,7 @@ void setup() {
   init_moveMole();
 
   //init btn
-  pinMode(BtnPin, INPUT_PULLUP);
+  //pinMode(BtnPin, INPUT_PULLUP);
 
   //calibrate line sensor
   calibrate_lineSensor();
@@ -30,10 +30,10 @@ void setup() {
 }
 
 void loop() {
-  int START = millis();
-
+  /*
   //On btn push START
   if( 1 == 1){ 
+    int START = millis();
     //////////// run line following for some time or until wall detected ////////////
     int x, y;
     while( (x = calcDist()) > 5.0 && (y= millis()-START) < PART_ONE){
@@ -97,6 +97,8 @@ void loop() {
   }
   */
 
+  
+
 }
 
 void Coin_Knocker(){
@@ -123,19 +125,22 @@ void Coin_Knocker(){
 void coin2(){
   cmForward(3);
   cmPivotLeft(100);
-  cmReverse(5);
+  cmReverse(10);
 
-  cmForward(5);
+  cmForward(10);
   cmPivotLeft(100);
-  cmForward(15);
+  cmForward(20);
 
   cmPivotRight(100);
-  cmReverse(5);
+  cmReverse(10);
   
-  cmForward(5);
+  cmForward(10);
   cmPivotRight(100);
-  cmForward(7);
+  cmForward(12);
   
-  cmPivotLeft(100);
-  cmForward(100);
+  cmPivotLeft(110);
+  cmForward(75);
+
+  for (int i = 0; i < 5; i++)
+    follow_line();
 }

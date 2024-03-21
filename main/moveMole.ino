@@ -252,6 +252,7 @@ void init_moveMole(){
     void moveMoles(){
       if ((curr == 'g' && next == 'b')
         || (curr == 'b' && next == 'w')
+        || (curr =='u' && next == 'r')
         || (curr == 'r' && next == 'p')
         || (curr == 'p' && next == 'y'))
       {
@@ -260,7 +261,6 @@ void init_moveMole(){
     
       else if ((curr == 'b' && next == 'g')
         || (curr == 'w' && next == 'b')
-        || (curr =='u' && next == 'w')
         || (curr == 'p' && next == 'r')
         || (curr == 'y' && next == 'p'))
       {
