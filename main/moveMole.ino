@@ -49,6 +49,11 @@ void init_moveMole(){
       int y = x/2;
       cm(y,0);
     }
+
+    void cmSpeed(int x){
+      int y = x/2;
+      cm(y,4);
+    }
     
     void cmReverse(int x) {
       int y = x/2;
@@ -87,6 +92,8 @@ void init_moveMole(){
         pivotLeft();
       } else if (dir == 3) { // Pivot Right
         pivotRight();
+      } else if (dir == 4) { // Speed
+        fastForward();
       }
     
       // Track distance and keep going until we've traveled the correct distance
@@ -130,6 +137,15 @@ void init_moveMole(){
       digitalWrite(in2, LOW);
       digitalWrite(in3, HIGH);
       digitalWrite(in4, LOW);
+      analogWrite(enA, 150);
+      analogWrite(enB, 150);
+    }
+
+    void fastForward(){
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, HIGH);
+      digitalWrite(in4, LOW);
       analogWrite(enA, 255);
       analogWrite(enB, 255);
     }
@@ -139,8 +155,8 @@ void init_moveMole(){
       digitalWrite(in2, HIGH);
       digitalWrite(in3, LOW);
       digitalWrite(in4, HIGH);
-      analogWrite(enA, 255);
-      analogWrite(enB, 255);
+      analogWrite(enA, 150);
+      analogWrite(enB, 150);
     }
     
     void brake() {
@@ -215,7 +231,7 @@ void init_moveMole(){
     void turnMoleLeftToRight(float angle, double distance1, double distance2) {
       cmReverse(distance1);
       cmPivotRight(angle);
-      cmForward(distance2);
+      cmSpeed(distance2);
       cmPivotLeft(180-angle);
     }
     

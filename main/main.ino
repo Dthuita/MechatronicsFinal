@@ -4,15 +4,42 @@
 /************** PINS **************/
 #define BtnPin 30
 
+#define led1 36
+#define led2 38
+#define led3 40
+#define led4 42
+#define led5 44
+#define led6 46
+#define led7 48
+#define led8 50
+
 /************** VARIABLES **************/
 const unsigned long PART_ONE = 30000; //how long part one, getting to wall will take
-const unsigned long PART_TWO = 10000; //how long recentering on the line will take as fail safe
+const unsigned long PART_TWO = 5000; //how long recentering on the line will take as fail safe
 
 char curr = 'u';
 char next = 'r';
 
 void setup() {
-  
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+  pinMode(led5, OUTPUT);
+  pinMode(led6, OUTPUT);
+  pinMode(led7, OUTPUT);
+  pinMode(led8, OUTPUT);
+
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+  digitalWrite(led5, LOW);
+  digitalWrite(led6, LOW);
+  digitalWrite(led7, LOW);
+  digitalWrite(led8, LOW);
+
   //init sensors and motors; NOTE: dist sensor doesn't need init
   init_ColorSensor();
   init_LineSensor();
@@ -22,17 +49,17 @@ void setup() {
   init_moveMole();
 
   //init btn
-  //pinMode(BtnPin, INPUT_PULLUP);
+  pinMode(BtnPin, INPUT_PULLUP);
 
   //calibrate line sensor
   calibrate_lineSensor();
-   Serial.print("Setup co");
+  digitalWrite(led1, HIGH);
 }
 
 void loop() {
-  /*
+  
   //On btn push START
-  if( 1 == 1){ 
+  if( digitalRead(BtnPin) == LOW){ 
     int START = millis();
     //////////// run line following for some time or until wall detected ////////////
     int x, y;
@@ -49,20 +76,29 @@ void loop() {
     //////////// wall detected so turn to knock coins ////////////
     Serial.println("Coin knock!");
     //Coin_Knocker();
-    coin2();
-
-    // MEGAN ADDED CODE STARTS HERE//
     
-    /////////// hit button ///////////
-    //loopPressButton();
+    // MEGAN ADDED CODE STARTS HERE//
+    coin2();
+    digitalWrite(led2, HIGH);
 
     /////////// begin mole whacking ////////////
     while(1){
+      digitalWrite(led1, LOW);
+      digitalWrite(led2, LOW);
+      digitalWrite(led3, LOW);
+      digitalWrite(led4, LOW);
+      digitalWrite(led5, LOW);
+      digitalWrite(led6, LOW);
+      
       next = get_color();
       next = get_color();
       next = get_color();
+
+      digitalWrite(led3, HIGH);
       
       moveMoles();
+
+      digitalWrite(led4, HIGH);
 
       curr = next;
 
@@ -78,8 +114,13 @@ void loop() {
         follow_line();
         Serial.println("line following!");
       }
+
+      digitalWrite(led5, HIGH);
       
       swing_hammer();
+
+      digitalWrite(led6, HIGH);
+      delay(500);
     }
   }
 
@@ -94,11 +135,8 @@ void loop() {
     
     //servo_motor_test();
     //dist_test();
-  }
-  */
-
+  }*/
   
-
 }
 
 void Coin_Knocker(){
@@ -124,23 +162,36 @@ void Coin_Knocker(){
 
 void coin2(){
   cmForward(3);
-  cmPivotLeft(100);
-  cmReverse(10);
+  cmPivotLeft(80);
+  cmReverse(20);
 
-  cmForward(10);
-  cmPivotLeft(100);
+  cmForward(20);
+  cmPivotLeft(80);
   cmForward(20);
 
-  cmPivotRight(100);
-  cmReverse(10);
+  cmPivotRight(80);
+  cmReverse(20);
   
-  cmForward(10);
-  cmPivotRight(100);
+  cmForward(20);
+  cmPivotRight(80);
   cmForward(12);
   
-  cmPivotLeft(110);
+  cmPivotLeft(85);
   cmForward(75);
 
-  for (int i = 0; i < 5; i++)
+  int START = millis();
+  //////////// run line following for some time or until wall detected ////////////
+  int x, y;
+  while( (x = calcDist()) > 5.0 && (y= millis()-START) < 15000){
+
+    Serial.print("dis: ");Serial.println(x);
+    Serial.print("time: ");Serial.println(y);
+
+    //linefolow
     follow_line();
+    Serial.println("line following!");
+  }
+
+  fastForward();
+  delay(3000);
 }

@@ -26,9 +26,9 @@
 /*************************************************************************
 *  PID control system variables 
 *************************************************************************/
-float  Kp = 0.095; //related to the proportional control term;  //change the  value by trial-and-error (ex: 0.07).            
+float  Kp = 0.07; //related to the proportional control term;  //change the  value by trial-and-error (ex: 0.07).            
 float Ki = 0.0008; //related to the integral  control term; //change the value by trial-and-error (ex: 0.0008).          
-float  Kd = 0.6; //related to the derivative control term; //change the  value by trial-and-error (ex: 0.6).
+float  Kd = 0.5; //related to the derivative control term; //change the  value by trial-and-error (ex: 0.6).
               
 int P = 0;
 int I = 0;
@@ -46,10 +46,10 @@ int looptime = 250; //??? I made this up
 /*************************************************************************
 *  Motor speed variables (choose between 0 - no speed, and 255 - maximum speed)
 *************************************************************************/
-const  uint8_t maxspeeda = 255;
-const uint8_t maxspeedb = 255;
-const uint8_t basespeeda  = 255;
-const uint8_t basespeedb = 255;
+const  uint8_t maxspeeda = 75;
+const uint8_t maxspeedb = 75;
+const uint8_t basespeeda  = 50;
+const uint8_t basespeedb = 50;
 
 
 /************** FUNCs **************/

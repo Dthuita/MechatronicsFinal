@@ -24,12 +24,12 @@ void swing_hammer() {
   Serial.println("First Swing");
   myservo.write(90);
   delay(250); //may cause issues
-  myservo.write(0);
+  myservo.write(180);
   
   Serial.println("Second Swing");
   myservo.write(90);
   delay(250); //may cause issues
-  myservo.write(0);
+  myservo.write(180);
 }
 
 void servo_test(){
