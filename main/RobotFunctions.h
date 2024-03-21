@@ -14,8 +14,8 @@
 void init_ColorSensor(void);
 //funcs
 int getColorDis(int red, int green, int blue, int lux, int cTemp, int SAMPLE[5]);
-char* discrim(int R, int G, int B, int LUX, int CTEMP);
-char* get_color(void);
+char discrim(int R, int G, int B, int LUX, int CTEMP);
+char get_color(void);
 //tests
 void color_test();  
 

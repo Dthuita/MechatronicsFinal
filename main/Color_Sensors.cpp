@@ -81,10 +81,10 @@ int getColorDis(int red, int green, int blue, int lux, int cTemp, int SAMPLE[5])
 }
 
 
-char* discrim(int R, int G, int B, int LUX, int CTEMP){
+char discrim(int R, int G, int B, int LUX, int CTEMP){
   int colorDis;               //color dis
   int best_colDis = 3000;            //what it says
-  char* possible_color = "NULL";       //least dis
+  char possible_color = 'x';          //least dis
 
   for(int i=0; i< 18; i++){
       colorDis = getColorDis(R, G, B, LUX, CTEMP,  COLOR_SAMPLE[i]);
@@ -96,7 +96,7 @@ char* discrim(int R, int G, int B, int LUX, int CTEMP){
   return possible_color;
 }
 
-char* get_color(void) {
+char get_color(void) {
   uint16_t r, g, b, c, colorTemp, lux;
 
 
@@ -106,7 +106,7 @@ char* get_color(void) {
 
   delay(1000);
 
-  char* color = discrim(r, g, b, lux, colorTemp);
+  char color = discrim(r, g, b, lux, colorTemp);
   Serial.print("Color: ");Serial.println(color);
   return color;
 }

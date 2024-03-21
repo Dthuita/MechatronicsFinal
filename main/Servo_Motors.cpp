@@ -15,8 +15,8 @@ void init_Servo() {
   myservo.attach(servoPin);  // (pin, min, max)
   
   //init servo postion down
-  myservo.write(0);
-
+  myservo.write(90);
+  swing_hammer();
   
 }
 

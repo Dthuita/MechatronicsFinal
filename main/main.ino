@@ -161,7 +161,7 @@ void Coin_Knocker(){
 }
 
 void coin2(){
-  cmForward(3);
+  cmForward(4);
   cmPivotLeft(80);
   cmReverse(20);
 
@@ -170,19 +170,19 @@ void coin2(){
   cmForward(20);
 
   cmPivotRight(80);
-  cmReverse(20);
+  cmReverse(25);
   
-  cmForward(20);
+  cmForward(25);
   cmPivotRight(80);
   cmForward(12);
   
   cmPivotLeft(85);
-  cmForward(75);
+  cmForward(60);
 
   int START = millis();
   //////////// run line following for some time or until wall detected ////////////
   int x, y;
-  while( (x = calcDist()) > 5.0 && (y= millis()-START) < 15000){
+  while( (x = calcDist()) > 5.0 && (y= millis()-START) < 5000){
 
     Serial.print("dis: ");Serial.println(x);
     Serial.print("time: ");Serial.println(y);
@@ -193,5 +193,5 @@ void coin2(){
   }
 
   fastForward();
-  delay(3000);
+  delay(1000);
 }
